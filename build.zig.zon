@@ -1,0 +1,29 @@
+.{
+    .name = "cairo.zig",
+    .version = "1.18.2",
+
+    .dependencies = .{
+        .cairo = .{
+            .url = "https://www.cairographics.org/releases/cairo-1.18.2.tar.xz",
+            .hash = "12207aebdfe10995f6577324e43b629509358d35d520dc4c677e69de224a41d361e0",
+        },
+
+        .freetype = .{ .path = "pkg/freetype" },
+        .zlib = .{ .path = "pkg/zlib" },
+        .libpng = .{ .path = "pkg/libpng" },
+        .fontconfig = .{ .path = "pkg/fontconfig" },
+
+        .expat = .{
+            .url = "https://github.com/allyourcodebase/libexpat/archive/refs/heads/master.tar.gz",
+            .hash = "12201c4d02fa2dea1702608ea93b440978b1b5f58dcbdf624cd6274f0e6121046281",
+            .lazy = true,
+        },
+    },
+
+    .paths = .{
+        "build.zig",
+        "build.zig.zon",
+        "sources.zig",
+        "pkg",
+    },
+}
