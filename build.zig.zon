@@ -1,6 +1,7 @@
 .{
     .name = "cairo.zig",
     .version = "1.18.2",
+    .minimum_zig_version = "0.13.0",
 
     .dependencies = .{
         .cairo = .{
@@ -14,7 +15,7 @@
         .fontconfig = .{ .path = "pkg/fontconfig" },
 
         .expat = .{
-            .url = "https://github.com/allyourcodebase/libexpat/archive/refs/heads/master.tar.gz",
+            .url = "https://github.com/allyourcodebase/libexpat/archive/57aa500f8c9f6701044a5fd0ac5d730d36f800cd.tar.gz",
             .hash = "12201c4d02fa2dea1702608ea93b440978b1b5f58dcbdf624cd6274f0e6121046281",
             .lazy = true,
         },
