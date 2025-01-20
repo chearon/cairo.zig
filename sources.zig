@@ -623,7 +623,6 @@ pub const xlib = &.{
     "cairo-xlib-surface.c",
     "cairo-xlib-surface-shm.c",
     "cairo-xlib-visual.c",
-    "cairo-xlib-xcb-surface.c",
 };
 
 pub const xlib_tests = &.{
@@ -633,16 +632,16 @@ pub const xlib_tests = &.{
 };
 
 pub const xcb = &.{
-    "cairo-xcb-connection.c",
     "cairo-xcb-connection-core.c",
     "cairo-xcb-connection-render.c",
     "cairo-xcb-connection-shm.c",
+    "cairo-xcb-connection.c",
+    "cairo-xcb-resources.c",
     "cairo-xcb-screen.c",
     "cairo-xcb-shm.c",
-    "cairo-xcb-surface.c",
     "cairo-xcb-surface-core.c",
     "cairo-xcb-surface-render.c",
-    "cairo-xcb-resources.c",
+    "cairo-xcb-surface.c",
 };
 
 pub const quartz = &.{

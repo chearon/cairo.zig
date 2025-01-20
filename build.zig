@@ -16,6 +16,7 @@ pub fn build(b: *std.Build) !void {
     const use_ttx = b.option(bool, "use_ttx", "Use ttx from fonttools for converting fonts") orelse false;
     const use_tee = b.option(bool, "use_tee", "Use tee surface backend") orelse false;
     const use_xlib = (b.option(bool, "use_xlib", "Use X11 surface backend") orelse (target.result.os.tag == .linux or target.result.os.tag.isBSD())) or build_tests;
+    const use_xrender = (b.option(bool, "use_xrender", "Use XRender")) orelse use_xlib;
     const use_xcb = b.option(bool, "use_xcb", "Use XCB surface backend") orelse (target.result.os.tag == .linux or target.result.os.tag.isBSD());
     const use_quartz = b.option(bool, "use_quartz", "Use Quartz surface backend (only affects Darwin)") orelse target.result.isDarwin();
     const use_dwrite = b.option(bool, "use_dwrite", "Use DirectWrite font backend (only affects Windows)") orelse (target.result.os.tag == .windows);
@@ -321,8 +322,7 @@ pub fn build(b: *std.Build) !void {
     if (use_xlib) {
         lib.linkSystemLibrary("x11");
         lib.linkSystemLibrary("xext");
-        lib.linkSystemLibrary("xrender");
-        lib.linkSystemLibrary("xproto");
+        // lib.linkSystemLibrary("xproto");
         feature_config.addValues(.{ .CAIRO_HAS_XLIB_SURFACE = 1 });
 
         config.addValues(.{
@@ -331,19 +331,26 @@ pub fn build(b: *std.Build) !void {
             .HAVE_X11_EXTENSIONS_SHMSTR_H = 1,
             .HAVE_X11_XLIBINT_H = 1,
             .HAVE_X11_XPROTO_H = 1,
-            .HAVE_XRENDERCREATESOLIDFILL = 1,
-            .HAVE_XRENDERCREATELINEARGRADIENT = 1,
-            .HAVE_XRENDERCREATERADIALGRADIENT = 1,
-            .HAVE_XRENDERCREATECONICALGRADIENT = 1,
         });
-
-        feature_config.addValues(.{ .CAIRO_HAS_XLIB_XRENDER_SURFACE = 1 });
 
         try cairo_sources.appendSlice(sources.xlib);
 
         try test_sources.appendSlice(sources.xlib_tests);
 
         try boilerplate_sources.append("cairo-boilerplate-xlib.c");
+
+        if (use_xrender) {
+            lib.linkSystemLibrary("xrender");
+
+            config.addValues(.{
+                .HAVE_XRENDERCREATESOLIDFILL = 1,
+                .HAVE_XRENDERCREATELINEARGRADIENT = 1,
+                .HAVE_XRENDERCREATERADIALGRADIENT = 1,
+                .HAVE_XRENDERCREATECONICALGRADIENT = 1,
+            });
+
+            feature_config.addValues(.{ .CAIRO_HAS_XLIB_XRENDER_SURFACE = 1 });
+        }
     }
 
     if (use_xcb) {
@@ -357,6 +364,7 @@ pub fn build(b: *std.Build) !void {
 
         if (use_xlib) {
             lib.linkSystemLibrary("x11-xcb");
+            try cairo_sources.append("cairo-xlib-xcb-surface.c");
             feature_config.addValues(.{ .CAIRO_HAS_XLIB_XCB_FUNCTIONS = 1 });
         }
 
