@@ -14,6 +14,11 @@
         .libpng = .{ .path = "pkg/libpng" },
         .fontconfig = .{ .path = "pkg/fontconfig" },
 
+        .pixman = .{
+            .url = "https://github.com/allyourcodebase/pixman/archive/29b1a1151b02917799e6f28dbaab7bf2efba1438.tar.gz",
+            .hash = "12207264652346695affa3b5e5fe76d13532df41522fa8e9fc066fcf95e95d210011",
+        },
+
         .expat = .{
             .url = "https://github.com/allyourcodebase/libexpat/archive/57aa500f8c9f6701044a5fd0ac5d730d36f800cd.tar.gz",
             .hash = "12201c4d02fa2dea1702608ea93b440978b1b5f58dcbdf624cd6274f0e6121046281",

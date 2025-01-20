@@ -434,12 +434,18 @@ pub fn build(b: *std.Build) !void {
         });
     }
 
-    lib.linkSystemLibrary("pixman-1");
+    if (b.systemIntegrationOption("pixman", .{}))
+        lib.linkSystemLibrary("pixman-1")
+    else {
+        const pixman = b.dependency("pixman", .{
+            .target = target,
+            .optimize = optimize,
+        });
+        lib.linkLibrary(pixman.artifact("pixman"));
+    }
+
     feature_config.addValues(.{ .CAIRO_HAS_IMAGE_SURFACE = 1 });
-    config.addValues(.{
-        .HAS_PIXMAN_GLYPHS = 1,
-        .HAS_PIXMAN_r8g8b8_sRGB = 1,
-    });
+    config.addValues(.{ .HAS_PIXMAN_GLYPHS = 1 });
 
     feature_config.addValues(.{
         .CAIRO_HAS_USER_FONT = 1,
