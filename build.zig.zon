@@ -1,7 +1,8 @@
 .{
-    .name = "cairo.zig",
+    .name = .cairo_zig,
     .version = "1.18.2",
-    .minimum_zig_version = "0.13.0",
+    .fingerprint = 0x71e19aedf148bc19,
+    .minimum_zig_version = "0.14.0",
 
     .dependencies = .{
         .cairo = .{
@@ -9,19 +10,36 @@
             .hash = "12207aebdfe10995f6577324e43b629509358d35d520dc4c677e69de224a41d361e0",
         },
 
-        .freetype = .{ .path = "pkg/freetype" },
-        .zlib = .{ .path = "pkg/zlib" },
-        .libpng = .{ .path = "pkg/libpng" },
-        .fontconfig = .{ .path = "pkg/fontconfig" },
-
+        // https://github.com/allyourcodebase/pixman/pull/1
         .pixman = .{
-            .url = "https://github.com/allyourcodebase/pixman/archive/29b1a1151b02917799e6f28dbaab7bf2efba1438.tar.gz",
-            .hash = "12207264652346695affa3b5e5fe76d13532df41522fa8e9fc066fcf95e95d210011",
+            .url = "https://github.com/bandithedoge/pixman/archive/80475c32cc85a4f3cae6dd548e2b4eff845436bd.tar.gz",
+            .hash = "pixman-0.0.0-9hepuMcHAADs81NS83ux0N4W1T2b1r3XxV16jCrghjPK",
+            .lazy = true,
         },
+
+        .freetype = .{
+            .url = "https://github.com/hexops/freetype/archive/972cd37bccecae2cc9f54cf0b562263a13209d02.tar.gz",
+            .hash = "freetype-0.0.0-AAAAAA5JcwBMujojfNLEq5g_WijZtU56mRLYx8bjjiMU",
+            .lazy = true,
+        },
+
+        .zlib = .{
+            .url = "https://github.com/allyourcodebase/zlib/archive/6c72830882690c1eb2567a537525c3f432c1da50.tar.gz",
+            .hash = "zlib-1.3.1-ZZQ7lVgMAACwO4nUUd8GLhsuQ5JQq_VAhlEiENJTUv6h",
+            .lazy = true,
+        },
+
+        .libpng = .{
+            .url = "https://github.com/allyourcodebase/libpng/archive/a4639b4e1af088bfac51378cfcee2bb1e91eeabc.tar.gz",
+            .hash = "libpng-1.6.43-AAAAAFcqAAArN9fhRVe4x15y3IKTTho7UXAg_S5Ep5Ma",
+            .lazy = true,
+        },
+
+        .fontconfig = .{ .path = "pkg/fontconfig" },
 
         .expat = .{
             .url = "https://github.com/allyourcodebase/libexpat/archive/57aa500f8c9f6701044a5fd0ac5d730d36f800cd.tar.gz",
-            .hash = "12201c4d02fa2dea1702608ea93b440978b1b5f58dcbdf624cd6274f0e6121046281",
+            .hash = "libexpat-2.6.4-AAAAAAw1AAAcTQL6LeoXAmCOqTtECXixtfWNy99iTNYn",
             .lazy = true,
         },
     },

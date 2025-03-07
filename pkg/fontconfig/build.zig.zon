@@ -7,7 +7,11 @@
             .hash = "12201149afb3326c56c05bb0a577f54f76ac20deece63aa2f5cd6ff31a4fa4fcb3b7",
         },
 
-        .freetype = .{ .path = "../freetype" },
+        .freetype = .{
+            .url = "https://github.com/hexops/freetype/archive/972cd37bccecae2cc9f54cf0b562263a13209d02.tar.gz",
+            .hash = "freetype-0.0.0-AAAAAA5JcwBMujojfNLEq5g_WijZtU56mRLYx8bjjiMU",
+        },
+
         .libxml2 = .{ .path = "../libxml2" },
     },
 }

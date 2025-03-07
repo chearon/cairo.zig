@@ -1,4 +1,10 @@
 .zig-cache/
 zig-out/
+
+output/
+cairo-test-suite.log
+cairo-boilerplate-constructors.c
+cairo-test-constructors.c
+
 result*
 .direnv/

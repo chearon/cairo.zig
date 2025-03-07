@@ -18,9 +18,9 @@ pub fn build(b: *std.Build) !void {
     const use_xlib = (b.option(bool, "use_xlib", "Use X11 surface backend") orelse (target.result.os.tag == .linux or target.result.os.tag.isBSD())) or build_tests;
     const use_xrender = (b.option(bool, "use_xrender", "Use XRender")) orelse use_xlib;
     const use_xcb = b.option(bool, "use_xcb", "Use XCB surface backend") orelse (target.result.os.tag == .linux or target.result.os.tag.isBSD());
-    const use_quartz = b.option(bool, "use_quartz", "Use Quartz surface backend (only affects Darwin)") orelse target.result.isDarwin();
+    const use_quartz = b.option(bool, "use_quartz", "Use Quartz surface backend (only affects Darwin)") orelse target.result.os.tag.isDarwin();
     const use_dwrite = b.option(bool, "use_dwrite", "Use DirectWrite font backend (only affects Windows)") orelse (target.result.os.tag == .windows);
-    const use_glib = b.option(bool, "use_glib", "Use glib") orelse (target.result.os.tag == .linux or target.result.isBSD());
+    const use_glib = b.option(bool, "use_glib", "Use glib") orelse (target.result.os.tag == .linux or target.result.os.tag.isBSD());
     const use_spectre = b.option(bool, "use_spectre", "Use libspectre") orelse use_zlib;
     const symbol_lookup = b.option(bool, "symbol_lookup", "Symbol lookup in debug utils via binutils/bfd") orelse (optimize == .Debug);
 
@@ -31,6 +31,7 @@ pub fn build(b: *std.Build) !void {
         .target = target,
         .optimize = optimize,
         .link_libc = true,
+        .use_llvm = false,
     });
 
     lib.addIncludePath(cairo.path("src"));
@@ -108,9 +109,9 @@ pub fn build(b: *std.Build) !void {
         // aka `int mkdir(const char *, mode_t)`
         .HAVE_MKDIR = 2,
         .SIZEOF_VOID_P = target.result.ptrBitWidth() / 8,
-        .SIZEOF_INT = target.result.c_type_byte_size(.int),
-        .SIZEOF_LONG = target.result.c_type_byte_size(.long),
-        .SIZEOF_LONG_LONG = target.result.c_type_byte_size(.longlong),
+        .SIZEOF_INT = target.result.cTypeByteSize(.int),
+        .SIZEOF_LONG = target.result.cTypeByteSize(.long),
+        .SIZEOF_LONG_LONG = target.result.cTypeByteSize(.longlong),
         .SIZEOF_SIZE_T = target.result.ptrBitWidth() / 8,
     });
 
@@ -136,7 +137,7 @@ pub fn build(b: *std.Build) !void {
             .HAVE_MMAP = 1,
         });
 
-    if (target.result.os.tag == .linux or target.result.isWasm())
+    if (target.result.os.tag == .linux or target.result.cpu.arch.isWasm())
         config.addValues(.{
             .HAVE_BYTESWAP_H = 1,
             .HAVE_FENV_H = 1,
@@ -147,12 +148,12 @@ pub fn build(b: *std.Build) !void {
             .HAVE_SCHED_GETAFFINITY = 1,
         });
 
-    if (target.result.isDarwin())
+    if (target.result.os.tag.isDarwin())
         config.addValues(.{ .HAVE_XLOCALE_H = 1 })
     else
         config.addValues(.{ .HAVE_IO_H = 1 });
 
-    if (target.result.isDarwin() or target.result.os.tag == .linux)
+    if (target.result.os.tag.isDarwin() or target.result.os.tag == .linux)
         config.addValues(.{ .HAVE_WAITPID = 1 });
 
     if (target.result.cpu.arch.endian() == .big)
@@ -249,7 +250,7 @@ pub fn build(b: *std.Build) !void {
         try boilerplate_sources.append("cairo-boilerplate-svg.c");
     }
 
-    if (use_fontconfig or !(target.result.os.tag == .windows or target.result.isDarwin())) {
+    if (use_fontconfig or !(target.result.os.tag == .windows or target.result.os.tag.isDarwin())) {
         if (b.systemIntegrationOption("fontconfig", .{}))
             lib.linkSystemLibrary("fontconfig")
         else if (b.lazyDependency("fontconfig", .{
@@ -258,15 +259,16 @@ pub fn build(b: *std.Build) !void {
             .@"enable-libxml2" = false,
             .@"enable-libxml2-iconv" = false,
             // .@"enable-freetype" = use_freetype,
-        })) |fontconfig| {
-            const fc = fontconfig.artifact("fontconfig");
+        })) |dep| {
+            const fontconfig = dep.artifact("fontconfig");
             if (b.lazyDependency("expat", .{
                 .target = target,
                 .optimize = optimize,
             })) |expat|
-                fc.linkLibrary(expat.artifact("expat"));
+                fontconfig.linkLibrary(expat.artifact("expat"));
 
-            lib.linkLibrary(fc);
+            lib.linkLibrary(fontconfig);
+            lib.installLibraryHeaders(fontconfig);
         }
 
         config.addValues(.{
@@ -276,16 +278,19 @@ pub fn build(b: *std.Build) !void {
         feature_config.addValues(.{ .CAIRO_HAS_FC_FONT = 1 });
     }
 
-    if (use_freetype or !(target.result.os.tag == .windows or target.result.isDarwin())) {
+    if (use_freetype or !(target.result.os.tag == .windows or target.result.os.tag.isDarwin())) {
         if (b.systemIntegrationOption("freetype", .{}))
             lib.linkSystemLibrary("freetype")
         else {
             if (b.lazyDependency("freetype", .{
                 .target = target,
                 .optimize = optimize,
-                .@"enable-libpng" = use_png,
-            })) |dep|
-                lib.linkLibrary(dep.artifact("freetype"));
+                // .@"enable-libpng" = use_png,
+            })) |dep| {
+                const freetype = dep.artifact("freetype");
+                lib.linkLibrary(freetype);
+                lib.installLibraryHeaders(freetype);
+            }
 
             feature_config.addValues(.{ .CAIRO_HAS_FT_FONT = 1 });
             config.addValues(.{
@@ -375,7 +380,7 @@ pub fn build(b: *std.Build) !void {
         try boilerplate_sources.append("cairo-boilerplate-xcb.c");
     }
 
-    if (target.result.isDarwin() and use_quartz) {
+    if (target.result.os.tag.isDarwin() and use_quartz) {
         lib.linkFramework("CoreFoundation");
         lib.linkFramework("ApplicationServices");
 
@@ -435,21 +440,22 @@ pub fn build(b: *std.Build) !void {
     }
 
     if (symbol_lookup) {
-        lib.linkSystemLibrary("bfd");
+        // lib.linkSystemLibrary("bfd");
         config.addValues(.{
             .HAVE_BFD = 1,
             .CAIRO_HAS_SYMBOL_LOOKUP = 1,
         });
     }
 
-    if (b.systemIntegrationOption("pixman", .{}))
-        lib.linkSystemLibrary("pixman-1")
-    else {
-        const pixman = b.dependency("pixman", .{
-            .target = target,
-            .optimize = optimize,
-        });
-        lib.linkLibrary(pixman.artifact("pixman"));
+    if (b.systemIntegrationOption("pixman", .{})) {
+        lib.linkSystemLibrary("pixman-1");
+    } else if (b.lazyDependency("pixman", .{
+        .target = target,
+        .optimize = optimize,
+    })) |dep| {
+        const pixman = dep.artifact("pixman");
+        lib.linkLibrary(pixman);
+        lib.installLibraryHeaders(pixman);
     }
 
     feature_config.addValues(.{ .CAIRO_HAS_IMAGE_SURFACE = 1 });
@@ -467,26 +473,25 @@ pub fn build(b: *std.Build) !void {
         try cairo_sources.append("cairo-tee-surface.c");
     }
 
-    if (target.result.is_libc_lib_name("pthread")) {
-        lib.linkSystemLibrary("pthread");
+    lib.linkSystemLibrary("pthread");
 
-        config.addValues(.{
-            .CAIRO_HAS_PTHREAD = 1,
-            .CAIRO_HAS_REAL_PTHREAD = 1,
-        });
+    config.addValues(.{
+        .CAIRO_HAS_PTHREAD = 1,
+        .CAIRO_HAS_REAL_PTHREAD = 1,
+    });
 
-        try c_flags.appendSlice(&.{
-            "-pthread",
-            "-D_REENTRANT",
-        });
+    try c_flags.appendSlice(&.{
+        "-pthread",
+        "-D_REENTRANT",
+    });
 
-        try test_sources.appendSlice(sources.pthread_tests);
-    }
+    try test_sources.appendSlice(sources.pthread_tests);
 
     if (!target.result.cpu.arch.isX86())
         config.addValues(.{ .ATOMIC_OP_NEEDS_MEMORY_BARRIER = 1 });
 
-    if ((target.result.os.tag == .linux or target.result.isBSD() or target.result.isDarwin()) and use_zlib and config.values.contains("CAIRO_HAS_REAL_PTHREAD") and use_dl)
+    if ((target.result.os.tag == .linux or target.result.os.tag.isBSD() or target.result.os.tag.isDarwin()) and
+        use_zlib and config.values.contains("CAIRO_HAS_REAL_PTHREAD") and use_dl)
         config.addValues(.{ .CAIRO_HAS_TRACE = 1 });
 
     if (add_fallback_resolution)
@@ -536,6 +541,7 @@ pub fn build(b: *std.Build) !void {
     cairoboilerplate.linkLibrary(lib);
     cairoboilerplate.installHeadersDirectory(cairo.path("boilerplate"), "", .{});
 
+    // TODO: don't litter the source directory
     const boilerplate_constructors = b.path("cairo-boilerplate-constructors.c");
 
     const python = try b.findProgram(&.{"python3"}, &.{});
@@ -567,8 +573,7 @@ pub fn build(b: *std.Build) !void {
 
             any2ppm.addCSourceFile(.{ .file = cairo.path("test/any2ppm.c") });
             any2ppm.linkLibrary(lib);
-            // any2ppm.linkLibrary(cairoscript);
-            any2ppm.linkSystemLibrary2("librsvg-2.0", .{ .use_pkg_config = .force });
+            any2ppm.linkSystemLibrary("rsvg-2");
 
             any2ppm.step.dependOn(&lib.step);
 
@@ -580,6 +585,7 @@ pub fn build(b: *std.Build) !void {
             .target = target,
             .optimize = optimize,
             .link_libc = true,
+            .use_llvm = false,
         });
 
         cairo_test_suite.addCSourceFiles(.{
@@ -590,7 +596,6 @@ pub fn build(b: *std.Build) !void {
         cairo_test_suite.addIncludePath(cairo.path("test"));
         cairo_test_suite.linkLibrary(lib);
         cairo_test_suite.linkLibrary(cairoboilerplate);
-        // cairo_test_suite.linkLibrary(cairoscript);
         cairo_test_suite.addCSourceFiles(.{
             .files = &.{
                 "buffer-diff.c",
@@ -601,6 +606,7 @@ pub fn build(b: *std.Build) !void {
             .flags = c_flags.items,
         });
 
+        // TODO: don't litter the source directory
         const test_constructors = b.path("cairo-test-constructors.c");
 
         const make_test_constructors = b.addSystemCommand(try std.mem.concat(
@@ -644,6 +650,7 @@ pub fn build(b: *std.Build) !void {
                 .target = target,
                 .optimize = optimize,
                 .link_libc = true,
+                .use_llvm = false,
             });
 
             cairo_test_trace.addCSourceFiles(.{
