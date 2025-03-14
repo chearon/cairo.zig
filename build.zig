@@ -31,7 +31,6 @@ pub fn build(b: *std.Build) !void {
         .target = target,
         .optimize = optimize,
         .link_libc = true,
-        .use_llvm = false,
     });
 
     lib.addIncludePath(cairo.path("src"));
@@ -77,7 +76,6 @@ pub fn build(b: *std.Build) !void {
         "-fno-strict-aliasing",
         "-fno-common",
         "-D_GNU_SOURCE",
-        // https://github.com/ziglang/zig/wiki/FAQ#why-do-i-get-illegal-instruction-when-using-with-zig-cc-to-build-c-code
         "-fno-sanitize=undefined",
     });
     if (optimize != .Debug) {
@@ -454,6 +452,7 @@ pub fn build(b: *std.Build) !void {
         .optimize = optimize,
     })) |dep| {
         const pixman = dep.artifact("pixman");
+        pixman.root_module.sanitize_c = false;
         lib.linkLibrary(pixman);
         lib.installLibraryHeaders(pixman);
     }
@@ -585,7 +584,6 @@ pub fn build(b: *std.Build) !void {
             .target = target,
             .optimize = optimize,
             .link_libc = true,
-            .use_llvm = false,
         });
 
         cairo_test_suite.addCSourceFiles(.{
@@ -650,7 +648,6 @@ pub fn build(b: *std.Build) !void {
                 .target = target,
                 .optimize = optimize,
                 .link_libc = true,
-                .use_llvm = false,
             });
 
             cairo_test_trace.addCSourceFiles(.{

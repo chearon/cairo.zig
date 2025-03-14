@@ -6,8 +6,8 @@
 
     .dependencies = .{
         .cairo = .{
-            .url = "https://www.cairographics.org/releases/cairo-1.18.2.tar.xz",
-            .hash = "12207aebdfe10995f6577324e43b629509358d35d520dc4c677e69de224a41d361e0",
+            .url = "https://www.cairographics.org/releases/cairo-1.18.4.tar.xz",
+            .hash = "N-V-__8AAFW9nwOvQAmLG664NOHF67FmS00qy_Lhg72aEv9Q",
         },
 
         // https://github.com/allyourcodebase/pixman/pull/1
