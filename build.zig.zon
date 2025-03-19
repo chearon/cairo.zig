@@ -30,13 +30,17 @@
             .lazy = true,
         },
 
+
         .libpng = .{
-            .url = "https://github.com/allyourcodebase/libpng/archive/a4639b4e1af088bfac51378cfcee2bb1e91eeabc.tar.gz",
-            .hash = "libpng-1.6.43-AAAAAFcqAAArN9fhRVe4x15y3IKTTho7UXAg_S5Ep5Ma",
+            .url = "https://github.com/bandithedoge/libpng/archive/33f96680cfcbbf563f95efc6b6577374c15708eb.tar.gz",
+            .hash = "libpng-1.6.43-oiaFGlwqAAC_FTbIqUxyNhS5-yP_0h-YabxhZZ8w95No",
             .lazy = true,
         },
 
-        .fontconfig = .{ .path = "pkg/fontconfig" },
+        .fontconfig = .{
+            .path = "pkg/fontconfig",
+            .lazy = true,
+        },
 
         .expat = .{
             .url = "https://github.com/allyourcodebase/libexpat/archive/57aa500f8c9f6701044a5fd0ac5d730d36f800cd.tar.gz",
