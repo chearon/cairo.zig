@@ -1,6 +1,6 @@
 .{
     .name = .cairo_zig,
-    .version = "1.18.2",
+    .version = "1.18.4",
     .fingerprint = 0x71e19aedf148bc19,
     .minimum_zig_version = "0.14.0",
 
@@ -17,9 +17,10 @@
             .lazy = true,
         },
 
+        // https://github.com/hexops/freetype/pull/33
         .freetype = .{
-            .url = "https://github.com/hexops/freetype/archive/972cd37bccecae2cc9f54cf0b562263a13209d02.tar.gz",
-            .hash = "freetype-0.0.0-AAAAAA5JcwBMujojfNLEq5g_WijZtU56mRLYx8bjjiMU",
+            .url = "https://github.com/bandithedoge/freetype/archive/3d0618154d7b0797b22688e9bda3753270e76462.tar.gz",
+            .hash = "freetype-0.0.0-2bU4KiBJcwBfuCoK33E7c6OJynXCvaTBtRyI68c42A1O",
             .lazy = true,
         },
 
