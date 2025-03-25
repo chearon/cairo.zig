@@ -11,7 +11,5 @@
             .url = "https://github.com/bandithedoge/freetype/archive/3d0618154d7b0797b22688e9bda3753270e76462.tar.gz",
             .hash = "freetype-0.0.0-2bU4KiBJcwBfuCoK33E7c6OJynXCvaTBtRyI68c42A1O",
         },
-
-        .libxml2 = .{ .path = "../libxml2" },
     },
 }
