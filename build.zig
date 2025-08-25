@@ -78,6 +78,7 @@ pub fn build(b: *std.Build) !void {
         "-fno-strict-aliasing",
         "-fno-common",
         "-D_GNU_SOURCE",
+        "-DCAIRO_COMPILATION",
         "-fno-sanitize=undefined",
     });
     if (optimize != .Debug) {
@@ -97,9 +98,6 @@ pub fn build(b: *std.Build) !void {
         .HAVE_UINT64_T = 1,
         .HAVE___UINT128_T = 1,
         .HAVE_ALARM = 1,
-        .HAVE_CTIME_R = 1,
-        .HAVE_LOCALTIME_R = 1,
-        .HAVE_GMTIME_R = 1,
         .HAVE_GETLINE = 1,
         .HAVE_RAISE = 1,
         .HAVE_STRTOD_L = 1,
@@ -135,6 +133,9 @@ pub fn build(b: *std.Build) !void {
             .HAVE_NEWLOCALE = 1,
             .HAVE_STRNDUP = 1,
             .HAVE_MMAP = 1,
+            .HAVE_CTIME_R = 1,
+            .HAVE_LOCALTIME_R = 1,
+            .HAVE_GMTIME_R = 1,
         });
 
     if (target.result.os.tag == .linux or target.result.cpu.arch.isWasm())
@@ -399,6 +400,7 @@ pub fn build(b: *std.Build) !void {
         try c_flags.appendSlice(b.allocator, &.{
             "-DWIN32_LEAN_AND_MEAN",
             "-DNOMINMAX",
+            "-DCAIRO_WIN32_STATIC_BUILD",
         });
 
         lib.linkSystemLibrary("gdi32");
@@ -423,8 +425,7 @@ pub fn build(b: *std.Build) !void {
             try c_flags.appendSlice(b.allocator, &.{
                 "-DWINVER=_WIN32_WINNT_WIN10",
                 "-D_WIN32_WINNT=_WIN32_WINNT_WIN10",
-                "-DNTDDI_VERSION=NTDDI_WIN10_RS3",
-                "-DCAIRO_WIN32_STATIC_BUILD",
+                "-DNTDDI_VERSION=NTDDI_WIN10_RS3"
             });
 
             try cairo_sources.appendSlice(b.allocator, sources.win32);
