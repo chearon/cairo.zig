@@ -1,0 +1,27 @@
+{
+  "N-V-__8AAFW9nwOvQAmLG664NOHF67FmS00qy_Lhg72aEv9Q": {
+    "name": "cairo",
+    "url": "https://www.cairographics.org/releases/cairo-1.18.4.tar.xz",
+    "hash": "sha256-RF7YIIpuSCPeEianTKMZ02AOg/Y2n5mxQmUAZZnDLMs="
+  },
+  "pixman-0.0.0-9hepuMcHAADs81NS83ux0N4W1T2b1r3XxV16jCrghjPK": {
+    "name": "pixman",
+    "url": "https://github.com/bandithedoge/pixman/archive/80475c32cc85a4f3cae6dd548e2b4eff845436bd.tar.gz",
+    "hash": "sha256-iVLFwB5V0JMnK2Pzq+J7HMZ3dHd8L7w2PEnJyuFLWFo="
+  },
+  "N-V-__8AACdzQgB3Xt60BggeOhQybqmqPiqfBgmabFAL8LPJ": {
+    "name": "pixman",
+    "url": "https://cairographics.org/releases/pixman-0.42.2.tar.gz",
+    "hash": "sha256-6hSA762i/ZSLx1Nm98NJ4cltMpfQmj/mJibjjiNKYl4="
+  },
+  "freetype-0.0.0-2bU4KiBJcwBfuCoK33E7c6OJynXCvaTBtRyI68c42A1O": {
+    "name": "freetype",
+    "url": "https://github.com/bandithedoge/freetype/archive/3d0618154d7b0797b22688e9bda3753270e76462.tar.gz",
+    "hash": "sha256-SV/zjSM7WZalCDEDMM7Smr+4MbQIKXt8M+AHArJGmuo="
+  },
+  "N-V-__8AAKgyIgAxeJp8Y2TC-ZFkwRg2Ybtf6RStczbMIkA5": {
+    "name": "brotli",
+    "url": "https://pkg.machengine.org/brotli/10961426f03016e273f4f4653eae907e9e2339b6.tar.gz",
+    "hash": "sha256-fKHDFopY8WCcOO3/5eR/qTFoUX8nt8ARjKcGtVhpyXo="
+  }
+}

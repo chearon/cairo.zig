@@ -26,34 +26,36 @@ pub fn build(b: *std.Build) !void {
 
     const cairo = b.dependency("cairo", .{});
 
-    const lib = b.addStaticLibrary(.{
+    const lib = b.addLibrary(.{
         .name = "cairo",
-        .target = target,
-        .optimize = optimize,
-        .link_libc = true,
+        .root_module = b.createModule(.{
+            .target = target,
+            .optimize = optimize,
+            .link_libc = true,
+        }),
     });
 
     lib.addIncludePath(cairo.path("src"));
 
-    var cairo_sources = std.ArrayList([]const u8).init(b.allocator);
-    defer cairo_sources.deinit();
+    var cairo_sources = std.ArrayList([]const u8).empty;
+    defer cairo_sources.deinit(b.allocator);
 
-    try cairo_sources.appendSlice(sources.cairo);
+    try cairo_sources.appendSlice(b.allocator, sources.cairo);
 
-    var test_sources = std.ArrayList([]const u8).init(b.allocator);
-    defer test_sources.deinit();
+    var test_sources = std.ArrayList([]const u8).empty;
+    defer test_sources.deinit(b.allocator);
 
-    try test_sources.appendSlice(sources.tests);
+    try test_sources.appendSlice(b.allocator, sources.tests);
     var add_fallback_resolution = false;
     var build_any2ppm = false;
 
-    var boilerplate_sources = std.ArrayList([]const u8).init(b.allocator);
-    defer boilerplate_sources.deinit();
-    try boilerplate_sources.appendSlice(sources.boilerplate);
+    var boilerplate_sources = std.ArrayList([]const u8).empty;
+    defer boilerplate_sources.deinit(b.allocator);
+    try boilerplate_sources.appendSlice(b.allocator, sources.boilerplate);
 
-    var c_flags = std.ArrayList([]const u8).init(b.allocator);
-    defer c_flags.deinit();
-    try c_flags.appendSlice(&.{
+    var c_flags = std.ArrayList([]const u8).empty;
+    defer c_flags.deinit(b.allocator);
+    try c_flags.appendSlice(b.allocator, &.{
         "-Wmissing-declarations",
         "-Werror-implicit-function-declaration",
         "-Wpointer-arith",
@@ -79,7 +81,7 @@ pub fn build(b: *std.Build) !void {
         "-fno-sanitize=undefined",
     });
     if (optimize != .Debug) {
-        try c_flags.append("-Wp,-D_FORTIFY_SOURCE=2");
+        try c_flags.append(b.allocator, "-Wp,-D_FORTIFY_SOURCE=2");
     }
 
     const config = b.addConfigHeader(.{}, .{
@@ -208,16 +210,16 @@ pub fn build(b: *std.Build) !void {
             config.addValues(.{ .CAIRO_HAS_SPECTRE = 1 });
         }
 
-        try cairo_sources.appendSlice(sources.script_surface);
-        try test_sources.appendSlice(sources.script_tests);
+        try cairo_sources.appendSlice(b.allocator, sources.script_surface);
+        try test_sources.appendSlice(b.allocator, sources.script_tests);
 
         add_fallback_resolution = true;
         build_any2ppm = true;
 
         if (target.result.os.tag == .windows)
-            try test_sources.append("pdf-structure.c");
+            try test_sources.append(b.allocator, "pdf-structure.c");
 
-        try boilerplate_sources.appendSlice(sources.script_boilerplate);
+        try boilerplate_sources.appendSlice(b.allocator, sources.script_boilerplate);
     }
 
     if (use_png) {
@@ -238,14 +240,14 @@ pub fn build(b: *std.Build) !void {
             .CAIRO_HAS_PNG_FUNCTIONS = 1,
         });
 
-        try cairo_sources.appendSlice(sources.png);
+        try cairo_sources.appendSlice(b.allocator, sources.png);
 
-        try test_sources.appendSlice(sources.svg_tests);
+        try test_sources.appendSlice(b.allocator, sources.svg_tests);
 
         add_fallback_resolution = true;
         build_any2ppm = true;
 
-        try boilerplate_sources.append("cairo-boilerplate-svg.c");
+        try boilerplate_sources.append(b.allocator, "cairo-boilerplate-svg.c");
     }
 
     if (use_fontconfig or !(target.result.os.tag == .windows or target.result.os.tag.isDarwin())) {
@@ -312,13 +314,13 @@ pub fn build(b: *std.Build) !void {
             .HAVE_FT_COLR_V1 = 1,
         });
 
-        try cairo_sources.appendSlice(sources.freetype);
+        try cairo_sources.appendSlice(b.allocator, sources.freetype);
 
         if (use_fontconfig) {
-            try test_sources.appendSlice(sources.fontconfig);
+            try test_sources.appendSlice(b.allocator, sources.fontconfig);
 
             if (use_ttx)
-                try test_sources.appendSlice(sources.ttx_tests);
+                try test_sources.appendSlice(b.allocator, sources.ttx_tests);
         }
     }
 
@@ -336,11 +338,11 @@ pub fn build(b: *std.Build) !void {
             .HAVE_X11_XPROTO_H = 1,
         });
 
-        try cairo_sources.appendSlice(sources.xlib);
+        try cairo_sources.appendSlice(b.allocator, sources.xlib);
 
-        try test_sources.appendSlice(sources.xlib_tests);
+        try test_sources.appendSlice(b.allocator, sources.xlib_tests);
 
-        try boilerplate_sources.append("cairo-boilerplate-xlib.c");
+        try boilerplate_sources.append(b.allocator, "cairo-boilerplate-xlib.c");
 
         if (use_xrender) {
             lib.linkSystemLibrary("xrender");
@@ -367,15 +369,15 @@ pub fn build(b: *std.Build) !void {
 
         if (use_xlib) {
             lib.linkSystemLibrary("x11-xcb");
-            try cairo_sources.append("cairo-xlib-xcb-surface.c");
+            try cairo_sources.append(b.allocator, "cairo-xlib-xcb-surface.c");
             feature_config.addValues(.{ .CAIRO_HAS_XLIB_XCB_FUNCTIONS = 1 });
         }
 
-        try cairo_sources.appendSlice(sources.xcb);
+        try cairo_sources.appendSlice(b.allocator, sources.xcb);
 
-        try test_sources.append("xcb-surface-source.c");
+        try test_sources.append(b.allocator, "xcb-surface-source.c");
 
-        try boilerplate_sources.append("cairo-boilerplate-xcb.c");
+        try boilerplate_sources.append(b.allocator, "cairo-boilerplate-xcb.c");
     }
 
     if (target.result.os.tag.isDarwin() and use_quartz) {
@@ -388,13 +390,13 @@ pub fn build(b: *std.Build) !void {
             .CAIRO_HAS_QUARTZ_FONT = 1,
         });
 
-        try cairo_sources.appendSlice(sources.quartz);
-        try test_sources.appendSlice(sources.quartz_tests);
-        try boilerplate_sources.append("cairo-boilerplate-quartz.c");
+        try cairo_sources.appendSlice(b.allocator, sources.quartz);
+        try test_sources.appendSlice(b.allocator, sources.quartz_tests);
+        try boilerplate_sources.append(b.allocator, "cairo-boilerplate-quartz.c");
     }
 
     if (target.result.os.tag == .windows) {
-        try c_flags.appendSlice(&.{
+        try c_flags.appendSlice(b.allocator, &.{
             "-DWIN32_LEAN_AND_MEAN",
             "-DNOMINMAX",
         });
@@ -418,16 +420,16 @@ pub fn build(b: *std.Build) !void {
             });
 
             // TODO: this assumes target is at least Windows 10
-            try c_flags.appendSlice(&.{
+            try c_flags.appendSlice(b.allocator, &.{
                 "-DWINVER=_WIN32_WINNT_WIN10",
                 "-D_WIN32_WINNT=_WIN32_WINNT_WIN10",
                 "-DNTDDI_VERSION=NTDDI_WIN10_RS3",
                 "-DCAIRO_WIN32_STATIC_BUILD",
             });
 
-            try cairo_sources.appendSlice(sources.win32);
+            try cairo_sources.appendSlice(b.allocator, sources.win32);
 
-            try boilerplate_sources.appendSlice(sources.win32_boilerplate);
+            try boilerplate_sources.appendSlice(b.allocator, sources.win32_boilerplate);
         }
     }
 
@@ -452,7 +454,7 @@ pub fn build(b: *std.Build) !void {
         .optimize = optimize,
     })) |dep| {
         const pixman = dep.artifact("pixman");
-        pixman.root_module.sanitize_c = false;
+        pixman.root_module.sanitize_c = .off;
         lib.linkLibrary(pixman);
         lib.installLibraryHeaders(pixman);
     }
@@ -469,7 +471,7 @@ pub fn build(b: *std.Build) !void {
 
     if (use_tee) {
         feature_config.addValues(.{ .CAIRO_HAS_TEE_SURFACE = 1 });
-        try cairo_sources.append("cairo-tee-surface.c");
+        try cairo_sources.append(b.allocator, "cairo-tee-surface.c");
     }
 
     lib.linkSystemLibrary("pthread");
@@ -479,12 +481,12 @@ pub fn build(b: *std.Build) !void {
         .CAIRO_HAS_REAL_PTHREAD = 1,
     });
 
-    try c_flags.appendSlice(&.{
+    try c_flags.appendSlice(b.allocator, &.{
         "-pthread",
         "-D_REENTRANT",
     });
 
-    try test_sources.appendSlice(sources.pthread_tests);
+    try test_sources.appendSlice(b.allocator, sources.pthread_tests);
 
     if (!target.result.cpu.arch.isX86())
         config.addValues(.{ .ATOMIC_OP_NEEDS_MEMORY_BARRIER = 1 });
@@ -494,14 +496,14 @@ pub fn build(b: *std.Build) !void {
         config.addValues(.{ .CAIRO_HAS_TRACE = 1 });
 
     if (add_fallback_resolution)
-        try test_sources.appendSlice(sources.fallback_resolution_tests);
+        try test_sources.appendSlice(b.allocator, sources.fallback_resolution_tests);
 
     lib.addConfigHeader(config);
     lib.addConfigHeader(feature_config);
 
     lib.addCSourceFiles(.{
         .root = cairo.path("src"),
-        .files = try cairo_sources.toOwnedSlice(),
+        .files = try cairo_sources.toOwnedSlice(b.allocator),
         .flags = c_flags.items,
     });
 
@@ -511,11 +513,13 @@ pub fn build(b: *std.Build) !void {
 
     b.installArtifact(lib);
 
-    const cairomissing = b.addStaticLibrary(.{
+    const cairomissing = b.addLibrary(.{
         .name = "cairo-missing",
-        .target = target,
-        .optimize = optimize,
-        .link_libc = true,
+        .root_module = b.createModule(.{
+            .target = target,
+            .optimize = optimize,
+            .link_libc = true,
+        }),
     });
 
     cairomissing.addCSourceFiles(.{
@@ -525,11 +529,13 @@ pub fn build(b: *std.Build) !void {
     cairomissing.installHeadersDirectory(cairo.path("util/cairo-missing"), "", .{});
     cairomissing.linkLibrary(lib);
 
-    const cairoboilerplate = b.addStaticLibrary(.{
+    const cairoboilerplate = b.addLibrary(.{
         .name = "cairoboilerplate",
-        .target = target,
-        .optimize = optimize,
-        .link_libc = true,
+        .root_module = b.createModule(.{
+            .target = target,
+            .optimize = optimize,
+            .link_libc = true,
+        }),
     });
 
     cairoboilerplate.addCSourceFiles(.{
@@ -565,9 +571,11 @@ pub fn build(b: *std.Build) !void {
         if (build_any2ppm) {
             const any2ppm = b.addExecutable(.{
                 .name = "any2ppm",
-                .target = target,
-                .optimize = optimize,
-                .link_libc = true,
+                .root_module = b.createModule(.{
+                    .target = target,
+                    .optimize = optimize,
+                    .link_libc = true,
+                }),
             });
 
             any2ppm.addCSourceFile(.{ .file = cairo.path("test/any2ppm.c") });
@@ -581,9 +589,11 @@ pub fn build(b: *std.Build) !void {
 
         const cairo_test_suite = b.addExecutable(.{
             .name = "cairo-test-suite",
-            .target = target,
-            .optimize = optimize,
-            .link_libc = true,
+            .root_module = b.createModule(.{
+                .target = target,
+                .optimize = optimize,
+                .link_libc = true,
+            }),
         });
 
         cairo_test_suite.addCSourceFiles(.{
@@ -625,11 +635,13 @@ pub fn build(b: *std.Build) !void {
         b.installArtifact(cairo_test_suite);
 
         if (use_xlib and use_zlib) {
-            const pdiff = b.addStaticLibrary(.{
+            const pdiff = b.addLibrary(.{
                 .name = "pdiff",
-                .target = target,
-                .optimize = optimize,
-                .link_libc = true,
+                .root_module = b.createModule(.{
+                    .target = target,
+                    .optimize = optimize,
+                    .link_libc = true,
+                }),
             });
 
             pdiff.addCSourceFiles(.{
@@ -645,9 +657,11 @@ pub fn build(b: *std.Build) !void {
 
             const cairo_test_trace = b.addExecutable(.{
                 .name = "cairo-test-trace",
-                .target = target,
-                .optimize = optimize,
-                .link_libc = true,
+                .root_module = b.createModule(.{
+                    .target = target,
+                    .optimize = optimize,
+                    .link_libc = true,
+                }),
             });
 
             cairo_test_trace.addCSourceFiles(.{

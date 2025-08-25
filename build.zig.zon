@@ -2,7 +2,7 @@
     .name = .cairo_zig,
     .version = "1.18.4",
     .fingerprint = 0x71e19aedf148bc19,
-    .minimum_zig_version = "0.14.0",
+    .minimum_zig_version = "0.15.1",
 
     .dependencies = .{
         .cairo = .{
@@ -12,28 +12,26 @@
 
         // https://github.com/allyourcodebase/pixman/pull/1
         .pixman = .{
-            .url = "https://github.com/bandithedoge/pixman/archive/80475c32cc85a4f3cae6dd548e2b4eff845436bd.tar.gz",
-            .hash = "pixman-0.0.0-9hepuMcHAADs81NS83ux0N4W1T2b1r3XxV16jCrghjPK",
+            .url = "https://github.com/bandithedoge/pixman/archive/28698cec3be55d668df7895f447e78a1a899e55a.tar.gz",
+            .hash = "pixman-0.0.0-9hepuP4HAABpFJXcFsgmuPOzQrHzX7fs88Fn4D8TuBUV",
             .lazy = true,
         },
 
-        // https://github.com/hexops/freetype/pull/33
         .freetype = .{
-            .url = "https://github.com/bandithedoge/freetype/archive/3d0618154d7b0797b22688e9bda3753270e76462.tar.gz",
-            .hash = "freetype-0.0.0-2bU4KiBJcwBfuCoK33E7c6OJynXCvaTBtRyI68c42A1O",
+            .url = "https://github.com/allyourcodebase/freetype/archive/9d847affbd224cf6a7303ad6d98715e3675ef78c.tar.gz",
+            .hash = "freetype-2.13.3-C3-WdeyJAAD9z8BeYYQ8N3gNlPI9NvHRxg5039S5vhz7",
             .lazy = true,
         },
 
         .zlib = .{
-            .url = "https://github.com/allyourcodebase/zlib/archive/6c72830882690c1eb2567a537525c3f432c1da50.tar.gz",
-            .hash = "zlib-1.3.1-ZZQ7lVgMAACwO4nUUd8GLhsuQ5JQq_VAhlEiENJTUv6h",
+            .url = "https://github.com/allyourcodebase/zlib/archive/61e7df7e996ec5a5f13a653db3c419adb340d6ef.tar.gz",
+            .hash = "zlib-1.3.1-ZZQ7lbYMAAB1hTSOKSXAKAgHsfDcyWNH_37ojw5WSpgR",
             .lazy = true,
         },
 
-
         .libpng = .{
-            .url = "https://github.com/bandithedoge/libpng/archive/33f96680cfcbbf563f95efc6b6577374c15708eb.tar.gz",
-            .hash = "libpng-1.6.43-oiaFGlwqAAC_FTbIqUxyNhS5-yP_0h-YabxhZZ8w95No",
+            .url = "https://github.com/allyourcodebase/libpng/archive/d512607515687aa60b975d6a191aef9a692dac87.zip",
+            .hash = "libpng-1.6.50-oiaFGt4qAAB_vzrtvz9hA7_UiBW4arSaMVGc7ekKMCZ2",
             .lazy = true,
         },
 
@@ -43,8 +41,8 @@
         },
 
         .expat = .{
-            .url = "https://github.com/allyourcodebase/libexpat/archive/57aa500f8c9f6701044a5fd0ac5d730d36f800cd.tar.gz",
-            .hash = "libexpat-2.6.4-AAAAAAw1AAAcTQL6LeoXAmCOqTtECXixtfWNy99iTNYn",
+            .url = "https://github.com/allyourcodebase/libexpat/archive/2f2954d71f91142359fbbb158145bda7d36783d7.tar.gz",
+            .hash = "libexpat-2.7.1-y_akI-g7AABOKMRAFAL1BU60IqpRNHZXrUB_2Hu16Vsl",
             .lazy = true,
         },
     },
