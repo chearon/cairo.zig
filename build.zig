@@ -286,7 +286,7 @@ pub fn build(b: *std.Build) !void {
             if (b.lazyDependency("freetype", .{
                 .target = target,
                 .optimize = optimize,
-                // .@"enable-libpng" = use_png,
+                .@"enable-libpng" = use_png,
             })) |dep| {
                 const freetype = dep.artifact("freetype");
                 lib.linkLibrary(freetype);
