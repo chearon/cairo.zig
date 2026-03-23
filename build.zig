@@ -11,7 +11,7 @@ pub fn build(b: *std.Build) !void {
     const use_dl = b.option(bool, "use_dl", "Use libdl for dynamic library loading") orelse false;
     const use_zlib = (b.option(bool, "use_zlib", "Use zlib") orelse true) or build_tests;
     const use_png = (b.option(bool, "use_png", "Use libpng") orelse true) or build_tests;
-    const use_fontconfig = b.option(bool, "use_fontconfig", "Use Fontconfig (only affects Windows and Darwin)") orelse false;
+    const use_fontconfig = b.option(bool, "use_fontconfig", "Use Fontconfig (only affects Windows and Darwin)") orelse (target.result.os.tag == .linux);
     const use_freetype = b.option(bool, "use_freetype", "Use FreeType font backend (only affects Windows and Darwin)") orelse false;
     const use_ttx = b.option(bool, "use_ttx", "Use ttx from fonttools for converting fonts") orelse false;
     const use_tee = b.option(bool, "use_tee", "Use tee surface backend") orelse false;
@@ -251,7 +251,7 @@ pub fn build(b: *std.Build) !void {
         try boilerplate_sources.append(b.allocator, "cairo-boilerplate-svg.c");
     }
 
-    if (use_fontconfig or !(target.result.os.tag == .windows or target.result.os.tag.isDarwin())) {
+    if (use_fontconfig) {
         if (b.systemIntegrationOption("fontconfig", .{}))
             lib.linkSystemLibrary("fontconfig")
         else if (b.lazyDependency("fontconfig", .{
